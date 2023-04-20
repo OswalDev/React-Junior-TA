@@ -6,11 +6,12 @@ import './App.css'
 const CAT_ENDPOINT_RANDOM_FACT = 'https://catfact.ninja/fact'
 // const CAT_ENDPOINT_IMAGE_URL = `/cat/says/:text?size=:size&color=:color
 // /c/s/:text?s=:size&c=:color`
+const CAT_PREFIX_IMAGE_URL =  'https://cataas.com'
 
 // You're not allowed to use Axios, React Query, SWR, Apollo
 function App() {
-  const [fact, setFact] = useState('')
-  const [image, setImage] = useState('')
+  const [fact, setFact] = useState()
+  const [imageUrl, setImageUrl] = useState()
 
   useEffect( () => {
     fetch(CAT_ENDPOINT_RANDOM_FACT)
@@ -19,23 +20,30 @@ function App() {
       const { fact } = data
       setFact(fact)
 
+      //first 3 words from API call
+      const firstThreeWord = fact.split(' ',3).join(' ')
+      //first word from API call
       const firstWord = fact.split(' ')[0]
+
+      console.log(firstThreeWord)
+
+      fetch(`https://cataas.com/cat/says/${firstWord}?size=50&color=red&json=true`)
+      .then(res => res.json())
+      .then(response => {
+        const {url} = response
+        // console.log(response)
+        setImageUrl(url)
+      })
+
     })
   }, [])
 
-  async function getImageResponse() {
-    var str = fact.fact;
-    const response = await fetch('https://cataas.com/cat/says/:'+{str})
-    console.log(response)
-    return response
-  }
-
   return (
-    <div className="App"> 
-    <h1>Cat's app</h1>
-      {fact && <p>{fact}</p>}
-      <img src={image.url} alt=""/>
-    </div>
+    <main className={{display: 'flex',flexDirection:'column', justifyContent:'center', alignItems:'center',maxWidth: '800px',margin:'0 auto'}}> 
+      <h1>Cat's app</h1>
+        {fact && <p>{fact}</p>}
+        {imageUrl && <img src={`${CAT_PREFIX_IMAGE_URL}${imageUrl}`} alt={`Image extracted using the first three words for ${fact}`}/>}
+    </main>
   )
 }
 
